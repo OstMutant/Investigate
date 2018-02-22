@@ -23,11 +23,6 @@ public class FunctionsTest {
     }
 
     @Test
-    void test111() {
-
-    }
-
-    @Test
     void testNewSupplier() {
         Supplier<PrintBean> supplier = () -> new PrintBean();
         supplier.get().println(CONGRATULATION_SUPPLIER);
