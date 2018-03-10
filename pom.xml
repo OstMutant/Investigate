@@ -47,6 +47,12 @@
             <artifactId>derby</artifactId>
             <version>10.8.3.0</version>
         </dependency>
+        <!-- Hibernate 5.2.6 Final -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.2.6.Final</version>
+        </dependency>
     </dependencies>
 
 </project>

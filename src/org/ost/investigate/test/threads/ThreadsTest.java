@@ -25,7 +25,7 @@ public class ThreadsTest {
     void testThreadWaitNotify() throws Exception {
         Object lock = new Object();
 
-        class MyRunnable implements Runnable{
+        class MyRunnable implements Runnable {
             public void run() {
                 int count = 0;
                 while (count < 100) {
@@ -61,7 +61,7 @@ public class ThreadsTest {
     void testBlockingQueue() throws Exception {
         BlockingQueue blockingQueue = new SynchronousQueue();
 
-        Thread t1 = new Thread(new Runnable(){
+        Thread t1 = new Thread(new Runnable() {
             public void run() {
                 int count = 0;
                 while (count < 100) {
@@ -75,7 +75,7 @@ public class ThreadsTest {
                 }
             }
         });
-        Thread t2 = new Thread(new Runnable(){
+        Thread t2 = new Thread(new Runnable() {
             public void run() {
                 int count = 0;
                 while (count < 100) {
@@ -101,7 +101,7 @@ public class ThreadsTest {
     void testReentrantLock() throws Exception {
         ReentrantLock reentrantLock = new ReentrantLock();
         Condition condition = reentrantLock.newCondition();
-        class MyRunnable implements Runnable{
+        class MyRunnable implements Runnable {
             public void run() {
                 int count = 0;
                 while (count < 100) {
