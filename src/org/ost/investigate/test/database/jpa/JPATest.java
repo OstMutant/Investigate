@@ -28,73 +28,84 @@ public class JPATest {
 
     @AfterEach
     void after(TestInfo testInfo) throws InterruptedException {
-        List<String> sqlList = Tools.PhoneSQLContainer.deleteIdCodeTable();
-        sqlList.addAll(Tools.PersonSQLContainer.deletePersonTable());
-        Tools.destroyJDBC(Tools.CONNECTION_BY_DEFAULT, sqlList);
         entityManager.close();
         System.out.println("-------------------------------------- Finish - " + testInfo.getDisplayName());
     }
 
-//    @Test
-//    @DisplayName("Test delete only from Derby")
-//    void testDeleteOnly() throws Exception {
-//        List<String> sqlList = Tools.PersonSQLContainer.deletePersonTable();
-//        sqlList.addAll(Tools.PhoneSQLContainer.deleteIdCodeTable());
-//        Tools.destroyJDBC(Tools.CONNECTION_BY_DEFAULT, sqlList);
-//    }
-
     @Test
     @DisplayName("Test simple select from Derby")
-    void testSimpleSelect() throws Exception {
+    void testSimpleSelect(){
+
+        Person person = new Person();
+        person.setName("New Row");
+        person.setEmail("test@gmail.com");
+        person.setIdCode("1234567890");
+
         try {
             entityManager.getTransaction().begin();
-            Person p = new Person();
-            p.setName("New Row");
-            p.setEmail("test@gmail.com");
-            p.setIdCode("1234567890");
-            entityManager.persist(p);
-            entityManager.getTransaction().commit();
-            entityManager.getTransaction().begin();
-            Query query = entityManager.createQuery("SELECT e FROM Person e");
-            List<Person> list = (List<Person>) query.getResultList();
-            Assert.assertEquals(p, list.get(0));
+            entityManager.persist(person);
             entityManager.getTransaction().commit();
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
             ex.printStackTrace();
         }
+
+            entityManager.getTransaction().begin();
+            Query query = entityManager.createQuery("SELECT e FROM Person e");
+            List<Person> persons = (List<Person>) query.getResultList();
+            Assert.assertEquals(person, persons.get(0));
+            entityManager.getTransaction().commit();
+            
+        entityManager.getTransaction().begin();
+        entityManager.remove(person);
+        entityManager.getTransaction().commit();
     }
 
     @Test
-    @DisplayName("Test one to one for Derby")
-    void testOneToOne() throws Exception {
+    @DisplayName("Test one to many for Derby")
+    void testOneToMany(){
+        Person person = new Person();
+        person.setName("New Row");
+        person.setEmail("test@gmail.com");
+        person.setIdCode("1234567890");
+
+        Phone phone = new Phone();
+        phone.setNumber("0123456789");
+        phone.setPerson(person);
+
+        Phone phone1 = new Phone();
+        phone.setNumber("1111111111");
+        phone.setPerson(person);
+
+        person.getPhones().add(phone);
+        person.getPhones().add(phone1);
+
         try {
             entityManager.getTransaction().begin();
-
-            Person p = new Person();
-            p.setName("New Row");
-            p.setEmail("test@gmail.com");
-            p.setIdCode("1234567890");
-            entityManager.persist(p);
-
-            Phone iC = new Phone();
-            iC.setNumber("0123456789");
-            entityManager.persist(iC);
-
+            entityManager.persist(person);
+            entityManager.persist(phone);
+            entityManager.persist(phone1);
             entityManager.getTransaction().commit();
-
-            entityManager.getTransaction().begin();
-            Query query = entityManager.createQuery("SELECT e FROM Person e");
-            List<Person> list = (List<Person>) query.getResultList();
-            Assert.assertEquals(p, list.get(0));
-            query = entityManager.createQuery("SELECT e FROM Phone e");
-            List<Phone> listIC = (List<Phone>) query.getResultList();
-            Assert.assertEquals(iC, listIC.get(0));
-            entityManager.getTransaction().commit();
-
         } catch (Exception ex) {
             entityManager.getTransaction().rollback();
             ex.printStackTrace();
         }
+
+
+            entityManager.getTransaction().begin();
+            Query query = entityManager.createQuery("SELECT e FROM Person e");
+            List<Person> persons = (List<Person>) query.getResultList();
+            Assert.assertEquals(person, persons.get(0));
+            query = entityManager.createQuery("SELECT e FROM Phone e");
+            List<Phone> phones = (List<Phone>) query.getResultList();
+            Assert.assertTrue(phones.size() == 2);
+            Assert.assertTrue(phones.contains(phone) && phones.contains(phone1));
+            entityManager.getTransaction().commit();
+
+        entityManager.getTransaction().begin();
+        entityManager.remove(person);
+        entityManager.remove(phone);
+        entityManager.remove(phone1);
+        entityManager.getTransaction().commit();
     }
 }

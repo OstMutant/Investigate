@@ -1,10 +1,8 @@
 package org.ost.investigate.test.database.jpa.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "person")
@@ -17,6 +15,9 @@ public class Person {
     private String name = null;
     private String email = null;
     private String idCode = null;
+
+    @OneToMany
+    private List<Phone> phones = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -48,5 +49,13 @@ public class Person {
 
     public void setIdCode(String idCode) {
         this.idCode = idCode;
+    }
+
+    public List<Phone> getPhones() {
+        return phones;
+    }
+
+    public void setPhones(List<Phone> phones) {
+        this.phones = phones;
     }
 }

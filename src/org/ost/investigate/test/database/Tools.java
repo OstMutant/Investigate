@@ -44,7 +44,7 @@ public class Tools {
     }
 
     public static class ConnectionBean implements ConnectionDataGetter {
-        public final String CONST_URL = "jdbc:derby:testdb1;create=true";
+        public final String CONST_URL = "jdbc:derby:memory:testdb;create=true";
         public final String CONST_USER = "test";
         public final String CONST_PASSWORD = "pass123";
 
@@ -190,6 +190,7 @@ public class Tools {
         } catch (SQLException ex) {
             System.out.println("Error in connection" + ex);
         }
+
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
         } catch (SQLException ex) {
