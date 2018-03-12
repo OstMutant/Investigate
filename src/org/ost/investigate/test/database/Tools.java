@@ -44,6 +44,7 @@ public class Tools {
     }
 
     public static class ConnectionBean implements ConnectionDataGetter {
+//        public final String CONST_URL = "jdbc:derby:testdb;create=true";
         public final String CONST_URL = "jdbc:derby:memory:testdb;create=true";
         public final String CONST_USER = "test";
         public final String CONST_PASSWORD = "pass123";

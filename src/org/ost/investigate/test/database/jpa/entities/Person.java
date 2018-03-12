@@ -19,6 +19,9 @@ public class Person {
     @OneToMany
     private List<Phone> phones = new ArrayList<>();
 
+    @ManyToMany
+    private List<Community> communities = new ArrayList<>();
+
     public int getId() {
         return id;
     }
@@ -57,5 +60,13 @@ public class Person {
 
     public void setPhones(List<Phone> phones) {
         this.phones = phones;
+    }
+
+    public void setCommunities(List<Community> communities) {
+        this.communities = communities;
+    }
+
+    public List<Community> getCommunities() {
+        return communities;
     }
 }

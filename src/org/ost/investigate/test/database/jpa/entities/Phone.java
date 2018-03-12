@@ -23,7 +23,6 @@ public class Phone {
     }
 
     public int getId() {
-
         return id;
     }
 
