@@ -1,10 +1,14 @@
 package org.ost.investigate.test.database.jpa.entities;
 
+import org.ost.investigate.test.database.jpa.dictionary.Gender;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="gender", discriminatorType=DiscriminatorType.STRING)
 @Table(name = "person")
 public class Person {
 
@@ -16,9 +20,10 @@ public class Person {
     private String email = null;
     private String idCode = null;
 
+    @Enumerated(EnumType.STRING)
+    protected Gender gender;
     @OneToMany
     private List<Phone> phones = new ArrayList<>();
-
     @ManyToMany
     private List<Community> communities = new ArrayList<>();
 
@@ -68,5 +73,13 @@ public class Person {
 
     public List<Community> getCommunities() {
         return communities;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public Gender getGender() {
+        return gender;
     }
 }
