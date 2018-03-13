@@ -1,8 +1,12 @@
 package org.ost.investigate.test.database.jpa.entities;
 
+import org.ost.investigate.test.database.jpa.dictionary.OperatorType;
+
 import javax.persistence.*;
 
 @Entity
+@Inheritance(strategy= InheritanceType.JOINED)
+@DiscriminatorColumn(name="operatorType")
 @Table(name = "phone")
 public class Phone {
     @Id
@@ -10,6 +14,8 @@ public class Phone {
     private int id;
 
     private String number = null;
+    @Column(insertable = false, updatable = false)
+    private String operatorType;
 
     @ManyToOne
     private Person person = null;
@@ -37,4 +43,13 @@ public class Phone {
     public void setPerson(Person person) {
         this.person = person;
     }
+
+    public void setOperatorType(OperatorType operatorType) {
+        this.operatorType = operatorType.toString();
+    }
+
+    public OperatorType getGender() {
+        return OperatorType.valueOf(operatorType);
+    }
+
 }

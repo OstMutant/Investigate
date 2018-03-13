@@ -8,8 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.ost.investigate.test.database.Tools;
 import org.ost.investigate.test.database.jpa.dictionary.Gender;
+import org.ost.investigate.test.database.jpa.dictionary.OperatorType;
 import org.ost.investigate.test.database.jpa.entities.Community;
 import org.ost.investigate.test.database.jpa.entities.Man;
+import org.ost.investigate.test.database.jpa.entities.Mobile;
 import org.ost.investigate.test.database.jpa.entities.Phone;
 import org.ost.investigate.test.database.jpa.entities.Person;
 import org.ost.investigate.test.database.jpa.entities.Woman;
@@ -17,6 +19,7 @@ import org.ost.investigate.test.database.jpa.entities.Woman;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class JPATest {
@@ -26,7 +29,7 @@ public class JPATest {
     @BeforeEach
     void before(TestInfo testInfo) throws InterruptedException {
         System.out.println("-------------------------------------- Start - " + testInfo.getDisplayName());
-        entityManager = Tools.createEntityManager(Tools.CONNECTION_BY_DEFAULT, Arrays.asList(Person.class.getName(), Phone.class.getName(), Community.class.getName(), Man.class.getName(), Woman.class.getName()));
+        entityManager = Tools.createEntityManager(Tools.CONNECTION_BY_DEFAULT, Arrays.asList(Person.class.getName(), Phone.class.getName(), Community.class.getName(), Man.class.getName(), Woman.class.getName(), Mobile.class.getName()));
 
     }
 
@@ -239,6 +242,69 @@ public class JPATest {
         entityManager.remove(man);
         entityManager.remove(woman);
         entityManager.remove(community);
+        entityManager.getTransaction().commit();
+    }
+
+    @Test
+    @DisplayName("Test Joined Inheritance for Derby")
+    void testJoinedInheritance() {
+        Person person = new Person();
+        person.setName("Artur");
+        person.setEmail("test@gmail.com");
+        person.setIdCode("1234567890");
+        person.setGender(Gender.MALE);
+
+        Phone phone = new Phone();
+        phone.setNumber("0123456789");
+        phone.setPerson(person);
+
+        Mobile mobilePhone = new Mobile();
+        mobilePhone.setDescription("Test Description");
+        mobilePhone.setStart(new Date());
+        mobilePhone.setNumber("1111111111");
+        mobilePhone.setPerson(person);
+        mobilePhone.setOperatorType(OperatorType.MOBILE);
+
+        person.getPhones().add(phone);
+        person.getPhones().add(mobilePhone);
+
+        Community community = new Community();
+        community.setName("Test");
+        community.setDescription("Test Description");
+
+        person.getCommunities().add(community);
+
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.persist(person);
+            entityManager.persist(community);
+            entityManager.persist(phone);
+            entityManager.persist(mobilePhone);
+            entityManager.getTransaction().commit();
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            ex.printStackTrace();
+        }
+
+
+        entityManager.getTransaction().begin();
+        Query query = entityManager.createQuery("SELECT e FROM Person e WHERE e.id=" + person.getId());
+        Person personDB = (Person) query.getSingleResult();
+        Assert.assertEquals(personDB, person);
+        List<Phone> phones = personDB.getPhones();
+        Assert.assertTrue(phones.contains(phone));
+        Assert.assertTrue(phones.contains(mobilePhone));
+
+        query = entityManager.createQuery("SELECT e FROM Mobile e");
+        List<Mobile> mobiles = (List<Mobile>) query.getResultList();
+        Assert.assertTrue(mobiles.contains(mobilePhone));
+        entityManager.getTransaction().commit();
+
+        entityManager.getTransaction().begin();
+        entityManager.remove(person);
+        entityManager.remove(community);
+        entityManager.remove(phone);
+        entityManager.remove(mobilePhone);
         entityManager.getTransaction().commit();
     }
 }
