@@ -3,14 +3,15 @@ package org.ost.investigate.test.database.jpa.entities;
 import org.ost.investigate.test.database.jpa.dictionary.Gender;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="gender", discriminatorType=DiscriminatorType.STRING)
+@DiscriminatorColumn(name="gender")
 @Table(name = "person")
-public class Person {
+public class Person implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +20,9 @@ public class Person {
     private String name = null;
     private String email = null;
     private String idCode = null;
+    @Column(insertable = false, updatable = false)
+    private String gender;
 
-    @Enumerated(EnumType.STRING)
-    protected Gender gender;
     @OneToMany
     private List<Phone> phones = new ArrayList<>();
     @ManyToMany
@@ -76,10 +77,10 @@ public class Person {
     }
 
     public void setGender(Gender gender) {
-        this.gender = gender;
+        this.gender = gender.toString();
     }
 
     public Gender getGender() {
-        return gender;
+        return Gender.valueOf(gender);
     }
 }

@@ -9,8 +9,10 @@ import org.junit.jupiter.api.TestInfo;
 import org.ost.investigate.test.database.Tools;
 import org.ost.investigate.test.database.jpa.dictionary.Gender;
 import org.ost.investigate.test.database.jpa.entities.Community;
+import org.ost.investigate.test.database.jpa.entities.Man;
 import org.ost.investigate.test.database.jpa.entities.Phone;
 import org.ost.investigate.test.database.jpa.entities.Person;
+import org.ost.investigate.test.database.jpa.entities.Woman;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -24,7 +26,7 @@ public class JPATest {
     @BeforeEach
     void before(TestInfo testInfo) throws InterruptedException {
         System.out.println("-------------------------------------- Start - " + testInfo.getDisplayName());
-        entityManager = Tools.createEntityManager(Tools.CONNECTION_BY_DEFAULT, Arrays.asList(Person.class.getName(), Phone.class.getName(), Community.class.getName()));
+        entityManager = Tools.createEntityManager(Tools.CONNECTION_BY_DEFAULT, Arrays.asList(Person.class.getName(), Phone.class.getName(), Community.class.getName(), Man.class.getName(), Woman.class.getName()));
 
     }
 
@@ -179,29 +181,29 @@ public class JPATest {
     @Test
     @DisplayName("Test Single Table Inheritance for Derby")
     void testSingleTableInheritance() {
-        Person person = new Person();
-        person.setName("Artur");
-        person.setEmail("test@gmail.com");
-        person.setIdCode("1234567890");
-        person.setGender(Gender.MALE);
+        Man man = new Man();
+        man.setName("Artur");
+        man.setEmail("test@gmail.com");
+        man.setIdCode("1234567890");
+        man.setGender(Gender.MALE);
 
-        Person person1 = new Person();
-        person1.setName("Linda");
-        person1.setEmail("test1@gmail.com");
-        person1.setIdCode("1111111111");
-        person.setGender(Gender.FEMALE);
+        Woman woman = new Woman();
+        woman.setName("Linda");
+        woman.setEmail("test1@gmail.com");
+        woman.setIdCode("1111111111");
+        man.setGender(Gender.FEMALE);
 
         Community community = new Community();
         community.setName("Test");
         community.setDescription("Test Description");
 
-        person.getCommunities().add(community);
-        person1.getCommunities().add(community);
+        man.getCommunities().add(community);
+        woman.getCommunities().add(community);
 
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(person);
-            entityManager.persist(person1);
+            entityManager.persist(man);
+            entityManager.persist(woman);
             entityManager.persist(community);
             entityManager.getTransaction().commit();
         } catch (Exception ex) {
@@ -211,27 +213,31 @@ public class JPATest {
 
 
         entityManager.getTransaction().begin();
-        Query query = entityManager.createQuery("SELECT e FROM Person e");
+        Query query = entityManager.createQuery("SELECT e FROM Man e");
         List<Person> persons = (List<Person>) query.getResultList();
-        Assert.assertTrue(persons.size() == 2);
-        Assert.assertTrue(persons.contains(person) && persons.contains(person1));
+        Assert.assertTrue(persons.size() == 1);
+        Assert.assertTrue(persons.contains(man));
+        query = entityManager.createQuery("SELECT e FROM Woman e");
+        persons = (List<Person>) query.getResultList();
+        Assert.assertTrue(persons.size() == 1);
+        Assert.assertTrue(persons.contains(woman));
         query = entityManager.createQuery("SELECT e FROM Community e");
         List<Community> communities = (List<Community>) query.getResultList();
         Assert.assertTrue(communities.size() == 1);
         Assert.assertTrue(communities.contains(community));
-        query = entityManager.createQuery("SELECT e FROM Person e WHERE e.id=" + person.getId());
+        query = entityManager.createQuery("SELECT e FROM Person e WHERE e.id=" + man.getId());
         Person personDB = (Person) query.getSingleResult();
         communities = personDB.getCommunities();
         Assert.assertTrue(communities.contains(community));
-        query = entityManager.createQuery("SELECT e FROM Person e WHERE e.id=" + person1.getId());
+        query = entityManager.createQuery("SELECT e FROM Person e WHERE e.id=" + woman.getId());
         personDB = (Person) query.getSingleResult();
         communities = personDB.getCommunities();
         Assert.assertTrue(communities.contains(community));
         entityManager.getTransaction().commit();
 
         entityManager.getTransaction().begin();
-        entityManager.remove(person);
-        entityManager.remove(person1);
+        entityManager.remove(man);
+        entityManager.remove(woman);
         entityManager.remove(community);
         entityManager.getTransaction().commit();
     }
