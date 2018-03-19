@@ -9,7 +9,9 @@ import org.junit.jupiter.api.TestInfo;
 import org.ost.investigate.test.database.Tools;
 import org.ost.investigate.test.database.jpa.dictionary.Gender;
 import org.ost.investigate.test.database.jpa.dictionary.OperatorType;
+import org.ost.investigate.test.database.jpa.entities.BusinessCommunity;
 import org.ost.investigate.test.database.jpa.entities.Community;
+import org.ost.investigate.test.database.jpa.entities.CookingCommunity;
 import org.ost.investigate.test.database.jpa.entities.Man;
 import org.ost.investigate.test.database.jpa.entities.Mobile;
 import org.ost.investigate.test.database.jpa.entities.Phone;
@@ -29,7 +31,9 @@ public class JPATest {
     @BeforeEach
     void before(TestInfo testInfo) throws InterruptedException {
         System.out.println("-------------------------------------- Start - " + testInfo.getDisplayName());
-        entityManager = Tools.createEntityManager(Tools.CONNECTION_BY_DEFAULT, Arrays.asList(Person.class.getName(), Phone.class.getName(), Community.class.getName(), Man.class.getName(), Woman.class.getName(), Mobile.class.getName()));
+        entityManager = Tools.createEntityManager(Tools.CONNECTION_BY_DEFAULT, Arrays.asList(Person.class.getName(),
+                Phone.class.getName(), Community.class.getName(), Man.class.getName(), Woman.class.getName(),
+                Mobile.class.getName(), CookingCommunity.class.getName(), BusinessCommunity.class.getName()));
 
     }
 
@@ -305,6 +309,59 @@ public class JPATest {
         entityManager.remove(community);
         entityManager.remove(phone);
         entityManager.remove(mobilePhone);
+        entityManager.getTransaction().commit();
+    }
+
+    @Test
+    @DisplayName("Table Per Class for Derby")
+    void testTablePerClass() {
+        Person person = new Person();
+        person.setName("New Row");
+        person.setEmail("test@gmail.com");
+        person.setIdCode("1234567890");
+
+        BusinessCommunity businessCommunity = new BusinessCommunity();
+        businessCommunity.setName("Test");
+        businessCommunity.setDescription("Test Description");
+        businessCommunity.setRequirement("Test Requirement");
+
+        CookingCommunity cookingCommunity = new CookingCommunity();
+        cookingCommunity.setName("Test1");
+        cookingCommunity.setDescription("Test1 Description");
+
+        person.getCommunities().add(businessCommunity);
+        person.getCommunities().add(cookingCommunity);
+
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.persist(person);
+            entityManager.persist(businessCommunity);
+            entityManager.persist(cookingCommunity);
+            entityManager.getTransaction().commit();
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            ex.printStackTrace();
+        }
+
+        entityManager.getTransaction().begin();
+        Query query = entityManager.createQuery("SELECT e FROM Person e");
+        List<Person> persons = (List<Person>) query.getResultList();
+        Assert.assertTrue(persons.size() == 1);
+        Assert.assertTrue(persons.contains(person));
+        query = entityManager.createQuery("SELECT e FROM Community e");
+        List<Community> communities = (List<Community>) query.getResultList();
+        Assert.assertTrue(communities.size() == 2);
+        Assert.assertTrue(communities.contains(businessCommunity) && communities.contains(cookingCommunity));
+        query = entityManager.createQuery("SELECT e FROM Person e WHERE e.id=" + person.getId());
+        Person personDB = (Person) query.getSingleResult();
+        communities = personDB.getCommunities();
+        Assert.assertTrue(communities.contains(businessCommunity));
+        entityManager.getTransaction().commit();
+
+        entityManager.getTransaction().begin();
+        entityManager.remove(person);
+        entityManager.remove(businessCommunity);
+        entityManager.remove(cookingCommunity);
         entityManager.getTransaction().commit();
     }
 }
