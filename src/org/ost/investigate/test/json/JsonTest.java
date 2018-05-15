@@ -24,7 +24,7 @@ class JsonTest {
 
         String jsonString = "{\"level\":\"test\"}";
         JSONObject json = new JSONObject(jsonString);
-        assertEquals(json.optString("level", ""), "test");
+        assertEquals("test", json.optString("level", ""));
     }
 
     @Test
