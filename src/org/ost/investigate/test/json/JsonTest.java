@@ -43,6 +43,7 @@ class JsonTest {
         String jsonString = "{}";
         JSONObject json = new JSONObject(jsonString);
         assertNull(ofNullable(json.optString("level", null))
+                .filter(s-> !s.isEmpty())
                 .map(s -> s.replace("*", ""))
                 .orElse(null));
     }
